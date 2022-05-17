@@ -8,6 +8,9 @@ import store from '@/store'
 
 import {Button} from 'mint-ui'
 
+//加载即可
+import '@/mock/mockServer'
+
 //以阻⽌vue在启动时⽣成⽣产提⽰
 Vue.config.productionTip = false
 

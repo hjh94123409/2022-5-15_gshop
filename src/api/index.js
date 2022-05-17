@@ -31,3 +31,12 @@ export const reqUserInfo = () => ajax(BASE_URL + '/userinfo')
 // 10、用户登出(#10用户登出)
 export const reqLogout = () => ajax(BASE_URL + '/logout')
 
+
+//获取商家信息Mock
+export const reqShopInfo = () => ajax('/info')
+
+//获取商家评价Mock
+export const reqShopRatings = () => ajax('/ratings')
+
+//获取商家商品Mock
+export const reqShopGoods = () => ajax('/goods')
