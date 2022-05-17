@@ -97,8 +97,10 @@
                 />
                 <img
                   class="get_verification"
-                  src="./images/captcha.svg"
+                  src="http://localhost:4000/captcha"
                   alt="captcha"
+                  ref="captcha"
+                  @click="getCaptcha"
                 />
               </section>
             </section>
@@ -112,19 +114,24 @@
       </a>
     </div>
 
-    <AlertTip :alertText="alertText" v-show="isShowAlert" @closeTip="closeTip"></AlertTip>
+    <AlertTip
+      :alertText="alertText"
+      v-show="isShowAlert"
+      @closeTip="closeTip"
+    ></AlertTip>
   </section>
 </template>
 
 <script>
 import AlertTip from "@/components/AlertTip";
+import { reqSendCode, reqPwdLogin, reqSmsLogin } from "@/api/index";
 export default {
   name: "Login",
   data() {
     return {
       loginWay: true, //true代表短信登陆 false代表密码
       computeTime: 0,
-      intervalId: null,
+      intervalId: undefined,
       showPwd: false, //是否显示密码
       phone: "",
       pwd: "",
@@ -145,7 +152,7 @@ export default {
   },
   mounted() {},
   methods: {
-    getCode() {
+    async getCode() {
       //如果当前没有计时
       if (!this.intervalId) {
         //启动倒计时
@@ -155,14 +162,28 @@ export default {
           if (this.computeTime <= 0) {
             //停止计时
             clearInterval(this.intervalId);
-            this.intervalId = null;
+            this.intervalId = undefined;
           }
         }, 1000);
 
-        // 发送ajax请求
+        // 发送ajax请求(向指定手机号发送验证码短信)
+        const result = await reqSendCode(this.phone);
+        if (result.code === 1) {
+          //发送短信失败
+          //显示提示
+          this.showAlert(result.msg);
+          //停止倒计时
+
+          if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = undefined;
+            this.computeTime = 0;
+          }
+        }
       }
     },
-    loginFn() {
+    async loginFn() {
+      let result;
       //前台表单验证
       if (this.loginWay) {
         //短信登陆
@@ -170,33 +191,69 @@ export default {
         if (!rightPhone) {
           //提示手机号不正确
           this.showAlert("提示手机号不正确");
+          return;
         } else if (!/^\d{6}$/.test(code)) {
           //提示验证码必须是6位数字
           this.showAlert("提示验证码必须是6位数字");
+          return;
         }
+        //发送ajax请求 短信 登陆
+        result = await reqSmsLogin(phone, code);
       } else {
         //密码登陆
         const { name, pwd, captcha } = this;
         if (!name) {
           //用户名必须指定
           this.showAlert("用户名必须指定");
+          return;
         } else if (!pwd) {
           //密码必须指定
           this.showAlert("密码必须指定");
+          return;
         } else if (!captcha) {
           //验证码必须指定
           this.showAlert("验证码必须指定");
+          return;
         }
+        //发送ajax请求 密码 登陆
+        result = await reqPwdLogin({ name, pwd, captcha });
+      }
+      //停止计时器
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = undefined;
+        this.computeTime = 0;
+      }
+      //根据结果数据处理
+      if (result.code === 0) {
+        const user = result.data;
+        //将user保存到vuex的state
+        this.$store.dispatch("recordUserInfo", user);
+
+        //去个人中心页
+        this.$router.replace("/profile");
+      } else {
+        const msg = result.msg;
+        //显示警告提示
+        this.showAlert(msg);
+        //显示新的图片验证码
+        this.getCaptcha();
       }
     },
     showAlert(alertText) {
       this.isShowAlert = true;
       this.alertText = alertText;
     },
-    closeTip(){
+    closeTip() {
       this.isShowAlert = false;
-      this.alertText = '';
-    }
+      this.alertText = "";
+    },
+    getCaptcha(event) {
+      //获取一个新的图片验证码
+      // event.target.src = "http://localhost:4000/captcha?time=" + Date.now();
+      this.$refs.captcha.src =
+        "http://localhost:4000/captcha?time=" + Date.now();
+    },
   },
 };
 </script>

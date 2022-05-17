@@ -6,8 +6,10 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import FooterGuide from "./components/FooterGuide";
-// import { reqFoodTypes } from "./api";
+// import { getUserInfo } from "@/api";
+
 export default {
   name: "App",
   data() {
@@ -18,7 +20,12 @@ export default {
   components: {
     FooterGuide,
   },
-  mounted() {},
+  methods: {
+    ...mapActions(["getUserInfo"]),
+  },
+  mounted() {
+    this.getUserInfo();
+  },
 };
 </script>
 
