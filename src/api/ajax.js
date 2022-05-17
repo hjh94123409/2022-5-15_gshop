@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export default function(url, data={}, type="get"){
+export default function(url, data={}, type="GET"){
 
     return new Promise(function(resolve,reject){
         let promise

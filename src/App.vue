@@ -7,6 +7,7 @@
 
 <script>
 import FooterGuide from "./components/FooterGuide";
+// import { reqFoodTypes } from "./api";
 export default {
   name: "App",
   data() {
