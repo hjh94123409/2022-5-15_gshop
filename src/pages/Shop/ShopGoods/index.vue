@@ -1,62 +1,72 @@
 <template>
-  <div class="goods">
-    <div class="menu-wrapper">
-      <ul>
-        <!--  current -->
-        <li
-          class="menu-item"
-          :class="{ current: index === currentIndex }"
-          v-for="(good, index) in goods"
-          :key="index"
-          @click="clickMenuItem(index)"
-        >
-          <span class="text bottom-border-1px">
-            <img class="icon" :src="good.icon" v-if="good.icon" />
-            {{ good.name }}
-          </span>
-        </li>
-      </ul>
+  <div>
+    <div class="goods">
+      <div class="menu-wrapper">
+        <ul>
+          <!--  current -->
+          <li
+            class="menu-item"
+            :class="{ current: index === currentIndex }"
+            v-for="(good, index) in goods"
+            :key="index"
+            @click="clickMenuItem(index)"
+          >
+            <span class="text bottom-border-1px">
+              <img class="icon" :src="good.icon" v-if="good.icon" />
+              {{ good.name }}
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div class="foods-wrapper">
+        <ul ref="foodsUL">
+          <li
+            class="food-list-hook"
+            v-for="(good, index) in goods"
+            :key="index"
+          >
+            <h1 class="title">{{ good.name }}</h1>
+            <ul>
+              <li
+                class="food-item bottom-border-1px"
+                v-for="(food, index) in good.foods"
+                :key="index"
+                @click="showFood(food)"
+              >
+                <div class="icon">
+                  <img width="57" height="57" :src="food.icon" />
+                </div>
+                <div class="content">
+                  <h2 class="name">{{ food.name }}</h2>
+                  <p class="desc">{{ food.description }}</p>
+                  <div class="extra">
+                    <span class="count">月售 {{ food.sellCount }} 份</span>
+                    <span>好评率 {{ food.rating }}%</span>
+                  </div>
+                  <div class="price">
+                    <span class="now">￥{{ food.price }}</span>
+                  </div>
+                  <div class="cartcontrol-wrapper">
+                    <CartControl :food="food" />
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <ShopCart />
     </div>
-    <div class="foods-wrapper">
-      <ul ref="foodsUL">
-        <li class="food-list-hook" v-for="(good, index) in goods" :key="index">
-          <h1 class="title">{{ good.name }}</h1>
-          <ul>
-            <li
-              class="food-item bottom-border-1px"
-              v-for="(food, index) in good.foods"
-              :key="index"
-            >
-              <div class="icon">
-                <img width="57" height="57" :src="food.icon" />
-              </div>
-              <div class="content">
-                <h2 class="name">{{ food.name }}</h2>
-                <p class="desc">{{ food.description }}</p>
-                <div class="extra">
-                  <span class="count">月售 {{ food.sellCount }} 份</span>
-                  <span>好评率 {{ food.rating }}%</span>
-                </div>
-                <div class="price">
-                  <span class="now">￥{{ food.price }}</span>
-                </div>
-                <div class="cartcontrol-wrapper">
-                  <CartControl :food="food" />
-                </div>
-              </div>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+    <Food :food="food" ref="food" />
   </div>
 </template>
 
 <script>
 import BetterScroll from "better-scroll";
 import { mapState } from "vuex";
-
+import Food from "@/components/Food";
 import CartControl from "@/components/CartControl";
+import ShopCart from "@/components/ShopCart";
 
 export default {
   name: "ShopGoods",
@@ -64,6 +74,7 @@ export default {
     return {
       scrollY: 0,
       tops: [],
+      food: {},
     };
   },
   computed: {
@@ -81,6 +92,8 @@ export default {
   },
   components: {
     CartControl,
+    Food,
+    ShopCart,
   },
   methods: {
     _initScroll() {
@@ -116,6 +129,11 @@ export default {
       const scrollY = this.tops[index];
       this.scrollY = scrollY;
       this.foodsScroll.scrollTo(0, -scrollY, 300);
+    },
+
+    showFood(food) {
+      this.food = food;
+      this.$refs.food.toggleShow();
     },
   },
   mounted() {

@@ -2,9 +2,10 @@ import {reqShopInfo, reqShopRatings, reqShopGoods} from '@/api'
 import Vue from 'vue'
 
 const state = {
-    goods: [],
-    ratings: [],
-    info: {}
+    goods: [], //商品列表
+    ratings: [], //商家评价列表
+    info: {},   //商家信息
+    cartFoods: [], //购物车中食物列表
 }
 
 const mutations = {
@@ -24,8 +25,12 @@ const mutations = {
             // 使用Vue.set()
             //对象 属性名 属性值
             Vue.set(food, 'count', 1)
+
+            state.cartFoods.push(food) 
+
         } else {
             food.count++
+
         }
     },
 
@@ -33,6 +38,9 @@ const mutations = {
         
         if(food.count){
             food.count--
+            if(food.count === 0){
+                state.cartFoods.splice(state.cartFoods.indexOf(food), 1) 
+            }
         }
     }
 
@@ -75,7 +83,14 @@ const actions = {
 
 }
 
-const getters = {}
+const getters = {
+    totalCount(state){
+        return state.cartFoods.reduce((preTotal, food) => preTotal + food.count, 0)
+    }, 
+    totalPrice(state){
+        return state.cartFoods.reduce((preTotal, food) => preTotal + food.count * food.price, 0)
+    }
+}
 
 export default {
     state, 
