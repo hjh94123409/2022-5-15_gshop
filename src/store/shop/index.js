@@ -1,4 +1,5 @@
 import {reqShopInfo, reqShopRatings, reqShopGoods} from '@/api'
+import Vue from 'vue'
 
 const state = {
     goods: [],
@@ -15,7 +16,26 @@ const mutations = {
     },
     RECEIVE_GOODS(state, goods){
         state.goods = goods
+    }, 
+
+    INCREMENT_FOOD_COUNT(state, food){
+        if(!food.count){ //第一次点击
+            // food.count = 1//新增属性（没有数据绑定）
+            // 使用Vue.set()
+            //对象 属性名 属性值
+            Vue.set(food, 'count', 1)
+        } else {
+            food.count++
+        }
+    },
+
+    DECREMENT_FOOD_COUNT(state, food){
+        
+        if(food.count){
+            food.count--
+        }
     }
+
 }
 
 const actions = {
@@ -34,11 +54,23 @@ const actions = {
         }
     },
 
-    async getShopGoods({commit}){
+    async getShopGoods({commit}, callback){
         const result = await reqShopGoods()
         if(result.code === 0){
             commit('RECEIVE_GOODS', result.data)
+            callback && callback()
         }
+    },
+
+    //同步更新food中的count值
+    updateFoodCount({commit}, {isAdd, food}){
+        
+        if(isAdd){
+            commit('INCREMENT_FOOD_COUNT', food)
+        } else {
+            commit('DECREMENT_FOOD_COUNT', food)
+        }
+        
     }
 
 }
