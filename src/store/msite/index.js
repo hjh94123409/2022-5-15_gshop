@@ -48,7 +48,9 @@ const actions = {
     }
 }
 
-const getters = {}
+const getters = {
+   
+}
 
 export default {
     state,

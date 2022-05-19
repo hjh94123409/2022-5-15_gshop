@@ -42,6 +42,13 @@ const mutations = {
                 state.cartFoods.splice(state.cartFoods.indexOf(food), 1) 
             }
         }
+    },
+
+    RECEIVE_CLEAR_CART(state){
+        //清除food中的count
+        state.cartFoods.forEach(food => food.count = 0 )
+        //移除购物车中所有项
+        state.cartFoods = []
     }
 
 }
@@ -55,10 +62,11 @@ const actions = {
         }
     },
 
-    async getShopRatings({commit}){
+    async getShopRatings({commit}, callback){
         const result = await reqShopRatings()
         if(result.code === 0){
             commit('RECEIVE_RATINGS', result.data)
+            callback && callback()
         }
     },
 
@@ -79,6 +87,11 @@ const actions = {
             commit('DECREMENT_FOOD_COUNT', food)
         }
         
+    },
+
+    //
+    clearCart({commit}){
+        commit('RECEIVE_CLEAR_CART')
     }
 
 }
@@ -89,6 +102,9 @@ const getters = {
     }, 
     totalPrice(state){
         return state.cartFoods.reduce((preTotal, food) => preTotal + food.count * food.price, 0)
+    },
+    positive(state){
+        return state.ratings.reduce((preTotal, rating) => preTotal + (rating.rateType=== 0? 1: 0), 0)
     }
 }
 

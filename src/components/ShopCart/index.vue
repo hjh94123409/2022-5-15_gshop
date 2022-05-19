@@ -21,36 +21,45 @@
           <div class="pay not-enough" :class="payClass">{{ payText }}</div>
         </div>
       </div>
-      <div class="shopcart-list" v-show="listShow">
-        <div class="list-header">
-          <h1 class="title">购物车</h1>
-          <span class="empty">清空</span>
+      <transition name="move">
+        <div class="shopcart-list" v-show="listShow">
+          <div class="list-header">
+            <h1 class="title">购物车</h1>
+            <span class="empty" @click="clearCart">清空</span>
+          </div>
+          <div class="list-content">
+            <ul>
+              <li
+                class="food"
+                v-for="(cartFood, index) in cartFoods"
+                :key="index"
+              >
+                <span class="name">{{ cartFood.name }}</span>
+                <div class="price">
+                  <span>￥{{ cartFood.price }}</span>
+                </div>
+                <div class="cartcontrol-wrapper">
+                  <CartControl
+                    :food="cartFood"
+                    :updateListShow="updateListShow"
+                  />
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div class="list-content">
-          <ul>
-            <li
-              class="food"
-              v-for="(cartFood, index) in cartFoods"
-              :key="index"
-            >
-              <span class="name">{{ cartFood.name }}</span>
-              <div class="price">
-                <span>￥{{ cartFood.price }}</span>
-              </div>
-              <div class="cartcontrol-wrapper">
-                <CartControl :food="cartFood" />
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+      </transition>
     </div>
-    <div class="list-mask" v-show="listShow" @click="toggleShow"></div>
+    <transition name="fade">
+      <div class="list-mask" v-show="listShow" @click="toggleShow"></div>
+    </transition>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import BSscroll from "better-scroll";
+import { MessageBox } from "mint-ui";
 import CartControl from "@/components/CartControl";
 export default {
   name: "ShopCart",
@@ -85,22 +94,48 @@ export default {
         return "结算";
       }
     },
-    listShow() {
-      //总数量为0，直接不显示
-      if (this.totalCount === 0) {
-        this.isShow = false;
-        return false;
-      } else {
+    listShow: {
+      get() {
+        if (!this.totalCount) {
+          return false;
+        }
         return this.isShow;
-      }
+      },
+      set(newValue) {
+        if (!this.totalCount) {
+          this.isShow = newValue;
+        }
+        if (this.isShow) {
+          this.$nextTick(() => {
+            if (!this.scroll) {
+              this.scroll = new BSscroll(".list-content", {
+                click: true,
+              });
+            }
+          });
+        }
+      },
     },
   },
   methods: {
     toggleShow() {
       //当总数量大于0时才切换
-      if (this.totalCount > 0) {
-        this.isShow = !this.isShow;
+      if (!this.totalCount) {
+        return;
       }
+      this.isShow = !this.isShow;
+      this.listShow = false;
+    },
+    updateListShow() {
+      this.listShow = false;
+    },
+    clearCart() {
+      MessageBox.confirm("确定要清空购物车吗？").then(
+        () => {
+          this.$store.dispatch("clearCart");
+        },
+        () => {}
+      );
     },
   },
   components: { CartControl },

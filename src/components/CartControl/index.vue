@@ -26,10 +26,13 @@ export default {
   },
   props: {
     food: Object,
+    updateListShow: Function,
   },
   methods: {
     updateFoodCount(isAdd) {
       this.$store.dispatch("updateFoodCount", { isAdd, food: this.food });
+
+      this.updateListShow && this.updateListShow();
     },
   },
   mounted() {},
