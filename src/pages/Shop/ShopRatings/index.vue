@@ -82,7 +82,7 @@
                   {{ rec }}
                 </span>
               </div>
-              <div class="time">{{ rating.rateTime }}</div>
+              <div class="time">{{ rating.rateTime | dateFormat }}</div>
             </div>
           </li>
         </ul>

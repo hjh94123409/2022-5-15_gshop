@@ -2,7 +2,8 @@ import ajax from './ajax'
 
 // const URL_PATH = 'http://localhost:4000'
 
-const BASE_URL = '/api'
+const  BASE_URL = '/api'
+
 
 // 1、根据经纬度获取位置详情(#1根据经纬度获取位置详情)
 export const reqAddress = (geohash) => ajax(`${BASE_URL}/position/${geohash}`)
